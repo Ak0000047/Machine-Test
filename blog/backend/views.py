@@ -4,7 +4,7 @@ from django.shortcuts import render
 from rest_framework.views  import APIView
 from rest_framework.response import Response
 from rest_framework import status
-from .models import User,Posts
+from .models import Likes, User,Posts
 import re
 from datetime import datetime
 class UserRegisterView(APIView):
@@ -122,7 +122,7 @@ class UnPublishPostView(APIView):
         islogged=User.objects.get(username=user).is_loggedin
         if islogged==1:
             try:
-                post = Posts.objects.get(id=post_id, username=username)
+                post = Posts.objects.get(id=post_id, username=user)
             except Posts.DoesNotExist:
                 return Response({'error': 'Post not found or does not belong to the user'}, status=status.HTTP_404_NOT_FOUND)
             if post.is_posted==1:
@@ -150,7 +150,11 @@ class PostLikeView(APIView):
         islogged=User.objects.get(username=user).is_loggedin
         if islogged==1:
             if Posts.objects.get(id=post_id).is_posted==1:
-                post = Posts.objects.filter(id=post_id).update(likes=like)
+                if Likes.objects.filter(username=user,postid=post_id).count()==0:
+                    Posts.objects.filter(id=post_id).update(likes=like)
+                    Likes.objects.update_or_create(username=user,postid=post_id)
+                else:
+                    return Response({'error': 'You have already liked this post'}, status=status.HTTP_401_UNAUTHORIZED)
                 return Response({'message': 'Post liked.'}, status=status.HTTP_200_OK)
             else:
                 return Response({'error': 'The post is not published.'}, status=status.HTTP_401_UNAUTHORIZED)
@@ -176,8 +180,11 @@ class PostUnLikeView(APIView):
         islogged=User.objects.get(username=user).is_loggedin
         if islogged==1:
             if Posts.objects.get(id=post_id).is_posted==1:
-                post = Posts.objects.filter(id=post_id).update(likes=like)
-                return Response({'message': 'Post  unliked.'}, status=status.HTTP_200_OK)
+                if Likes.objects.filter(username=user,postid=post_id).count()==1:
+                    Posts.objects.filter(id=post_id).update(likes=like)
+                    Likes.objects.delete(username=user,postid=post_id)
+                    return Response({'message': 'Post  unliked.'}, status=status.HTTP_200_OK)
+                return Response({'error': 'You have like this  post to unlike '}, status=status.HTTP_401_UNAUTHORIZED)
             else:
                 return Response({'error': 'The post is not published.'}, status=status.HTTP_401_UNAUTHORIZED)
         return Response({'error': 'the  user need to login to like the posts'}, status=status.HTTP_401_UNAUTHORIZED)

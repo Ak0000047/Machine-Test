@@ -122,7 +122,13 @@ class DjangoSession(models.Model):
         db_table = 'django_session'
 
 
+class Likes(models.Model):
+    username = models.CharField(max_length=45)
+    postid = models.IntegerField()
 
+    class Meta:
+        managed = False
+        db_table = 'likes'
 
 
 class Posts(models.Model):
