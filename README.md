@@ -1,5 +1,5 @@
-Here i added My project Blog then its zip file and the database  for that the database name is 'tasks'
-Tach Stacks Used Django, Python, Mysql as Database
+Here i added My project Blog Inculdes the  zip file and the database  for that the database name is 'tasks'
+Tech Stacks Used were Django, Python, Mysql as Database
 
 #   http://127.0.0.1:8000/user/register/   for registering user
 #   http://127.0.0.1:8000/user/login/      for login user
